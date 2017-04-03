@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <!-- jQuery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <!-- Firebase -->
+        <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+        <!-- Firechat -->
+        <link rel="stylesheet" href="https://cdn.firebase.com/libs/firechat/3.0.1/firechat.min.css" />
+        <script src="https://cdn.firebase.com/libs/firechat/3.0.1/firechat.min.js"></script>
+        <!-- Custom CSS -->
+        <style>
+            body {
+                font-family: arial, helvetica, sans-serif;
+                font-size: 13px;
+            } 
+            #firechat-wrapper {
+                height: 475px;
+                max-width: 325px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                background-color: #fff;
+                margin: 20px auto;
+                text-align: center;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                border-radius: 4px;
+                -webkit-box-shadow: 0 5px 25px #666;
+                -moz-box-shadow: 0 5px 25px #666;
+                box-shadow: 0 5px 25px #666;
+            }
+            #logo {
+                display: block;
+                margin: 30px auto;
+            }
+            p {
+                text-align: center;
+            }
+            #login, #logout {
+                display: block;
+                margin: 20px auto;
+                cursor: pointer;
+                width: 100px;
+                height: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <img src="logo_gray.png" id="logo" alt="">
+        <div id="firechat-wrapper"></div>
+        <p>Inicia sesión con google para ver el chat</p>
+        <button onclick="login();" id="login">google login</button>
+        <button onclick="logout();" id="logout">Salir</button>
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+        <script type="text/javascript">
+            // Initialize Firebase SDK
+            var config = {
+                apiKey: "AIzaSyBGzudKqOSxKTCyT5J7oFFT6iyGyri16ao",
+                authDomain: "chat-af215.firebaseapp.com",
+                databaseURL: "https://chat-af215.firebaseio.com"
+            };
+            firebase.initializeApp(config);
+            function login() {
+                var provider = new firebase.auth.GoogleAuthProvider();
+                firebase.auth().signInWithPopup(provider).catch(function(error) {
+                    console.log("Error authenticating user:", error);
+                });
+            }
+            function logout() {
+                firebase.auth().signOut();
+            };
+            firebase.auth().onAuthStateChanged(function(user) {
+                if ( user ) {
+                    initChat(user);
+                    $("#login, p").hide(); $("#logout, #firechat-wrapper").show();
+                }else {
+                    $("#login, p").show(); $("#logout, #firechat-wrapper").hide();
+                }
+                console.log(user);
+            });
+            function initChat(user) {
+                // Get a Firebase Database ref
+                var chatRef = firebase.database().ref("chat");
+                // Create a Firechat instance
+                var chat = new FirechatUI(chatRef, document.getElementById("firechat-wrapper"));
+                // Set the Firechat user
+                chat.setUser(user.uid, user.displayName);
+            }
+        </script>
+    </body>
+</html>
